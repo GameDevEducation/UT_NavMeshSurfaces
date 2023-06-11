@@ -15,7 +15,7 @@ NavMeshProjectSettings:
     cost: 3
   - name: Transitions
     cost: 1.5
-  - name: 
+  - name: Doors
     cost: 1
   - name: 
     cost: 1

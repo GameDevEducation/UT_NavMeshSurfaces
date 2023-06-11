@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,6 +10,8 @@ public class SimpleAICharacter : MonoBehaviour
     [SerializeField] float NearestPointSearchRange = 0.5f;
 
     NavMeshAgent LinkedAgent;
+    DoorNavLink ActiveNavLink;
+
     bool DestinationSet = false;
     bool OffMeshLinkInProgress = false;
 
@@ -35,6 +38,22 @@ public class SimpleAICharacter : MonoBehaviour
         if (LinkedAgent.isOnOffMeshLink && !OffMeshLinkInProgress)
         {
             OffMeshLinkInProgress = true;
+
+            // look for our door link
+            var navMeshLink = LinkedAgent.navMeshOwner as NavMeshLink;
+            if (navMeshLink != null)
+            {
+                if (navMeshLink.gameObject.TryGetComponent<DoorNavLink>(out ActiveNavLink))
+                {
+                    ActiveNavLink.StartTraversal(LinkedAgent, () =>
+                    {
+                        OffMeshLinkInProgress = false;
+                        ActiveNavLink = null;
+                    });
+                    return;
+                }
+            }
+
             StartCoroutine(FollowOffMeshLink_Lerp());
         }
     }
@@ -66,6 +85,9 @@ public class SimpleAICharacter : MonoBehaviour
     public void MoveTo(Vector3 newDestination)
     {
         NavMeshHit hitResult;
+
+        if (OffMeshLinkInProgress)
+            return;
 
         if (NavMesh.SamplePosition(newDestination, out hitResult, NearestPointSearchRange, NavMesh.AllAreas))
         {

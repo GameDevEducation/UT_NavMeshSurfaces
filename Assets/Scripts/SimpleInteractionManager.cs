@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SimpleInteractionManager : MonoBehaviour
 {
-    [SerializeField] SimpleAICharacter LinkedCharacter;
+    [SerializeField] List<SimpleAICharacter> LinkedCharacters;
     [SerializeField] LayerMask RaycastMask = ~0;
     [SerializeField] float RaycastRange = 100f;
 
@@ -26,7 +26,8 @@ public class SimpleInteractionManager : MonoBehaviour
             RaycastHit hitInfo;
             if (Physics.Raycast(cameraRay, out hitInfo, RaycastRange, RaycastMask, QueryTriggerInteraction.Ignore)) 
             { 
-                LinkedCharacter.MoveTo(hitInfo.point);
+                foreach(var character in LinkedCharacters)
+                    character.MoveTo(hitInfo.point);
             }
         }
     }
